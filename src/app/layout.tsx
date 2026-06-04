@@ -1,0 +1,40 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { AppWarmup } from "@/components/layout/AppWarmup";
+import { AppMotionShell } from "@/components/layout/AppMotionShell";
+import { Toaster } from "@/components/ui/sonner";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "VibeTribe",
+  description: "Find your vibe. Build your tribe.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="min-h-screen font-sans antialiased selection:bg-blue-200/70 selection:text-slate-950">
+        <QueryProvider>
+          <AppWarmup />
+          <AppMotionShell>{children}</AppMotionShell>
+          <Toaster />
+        </QueryProvider>
+      </body>
+    </html>
+  );
+}

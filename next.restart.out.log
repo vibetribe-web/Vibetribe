@@ -1,0 +1,16 @@
+
+> vibetribe-frontend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.116.205.9:3000
+- Environments: .env.local
+✓ Ready in 487ms
+Creating turbopack project { dir: 'C:\\VibeTribe\\vibetribe-frontend', testMode: true }
+
+ GET /clubs 200 in 490ms (next.js: 184ms, application-code: 306ms)
+ GET /clubs 200 in 49ms (next.js: 3ms, application-code: 45ms)
+ GET /clubs 200 in 116ms (next.js: 8ms, application-code: 108ms)
+ GET /clubs 200 in 106ms (next.js: 13ms, application-code: 93ms)
+ GET /dashboard 200 in 118ms (next.js: 64ms, application-code: 55ms)

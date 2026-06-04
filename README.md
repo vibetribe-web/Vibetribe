@@ -2,6 +2,14 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Create or update `.env.local`:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001
+```
+
+Event poster uploads are signed by the backend. Configure Supabase Storage in the backend `.env`; the frontend only needs the API base URL.
+
 First, run the development server:
 
 ```bash
