@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { createJoinRequest } from "@/services/requestService";
 import { createTeam, listTeams } from "@/services/teamService";
 import type { Team, TeamMember } from "@/types/team";
@@ -93,7 +94,7 @@ export default function TeamsPage() {
       await queryClient.invalidateQueries({ queryKey: teamsQueryKey });
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Could not create team");
+      toast.error(getFriendlyErrorMessage(error, "Could not create team."));
     },
   });
 
@@ -116,7 +117,7 @@ export default function TeamsPage() {
     },
     onError: (error, _payload, context) => {
       if (context?.previous) queryClient.setQueryData(teamsQueryKey, context.previous);
-      toast.error(error instanceof Error ? error.message : "Could not send request");
+      toast.error(getFriendlyErrorMessage(error, "Could not send request."));
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: myRequestsQueryKey });

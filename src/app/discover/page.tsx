@@ -24,6 +24,7 @@ import { useRequireAuth } from "@/hooks/useAuth";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
 import { usernameLabel } from "@/lib/userDisplay";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { createJoinRequest } from "@/services/requestService";
 import { listTeams } from "@/services/teamService";
 import { listUsers } from "@/services/userService";
@@ -90,7 +91,7 @@ export default function DiscoverPage() {
       setRequestTarget(null);
       setMessage("");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not send request");
+      toast.error(getFriendlyErrorMessage(error, "Could not send request."));
     }
   }
 

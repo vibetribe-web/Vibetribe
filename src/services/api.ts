@@ -11,13 +11,61 @@ const inFlightGetRequests = new Map<string, Promise<unknown>>();
 export class ApiError extends Error {
   status: number;
   details?: unknown;
+  code?: "offline" | "network" | "auth" | "validation" | "server" | "unknown";
 
-  constructor(message: string, status: number, details?: unknown) {
+  constructor(
+    message: string,
+    status: number,
+    details?: unknown,
+    code: ApiError["code"] = "unknown",
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.details = details;
+    this.code = code;
   }
+}
+
+export function getFriendlyErrorMessage(
+  error: unknown,
+  fallback = "Something went wrong. Please try again.",
+  context?: "login" | "register" | "auth" | "server",
+) {
+  if (context === "login" && error instanceof ApiError && error.status === 401) {
+    return "Invalid email or password. Please try again.";
+  }
+
+  if (error instanceof ApiError) {
+    if (error.code === "offline") {
+      return "You appear to be offline. Please reconnect and try again.";
+    }
+    if (error.status === 0 || error.code === "network") {
+      return "We are having trouble connecting right now. Please check your internet or try again later.";
+    }
+    if (error.status === 401) {
+      return context === "auth" ? "Please sign in again to continue." : "Invalid email or password. Please try again.";
+    }
+    if (error.status === 403) {
+      return "You do not have permission to do that.";
+    }
+    if (error.status === 409) {
+      return "That item already exists. Please try a different option.";
+    }
+    if (error.status === 422 || error.code === "validation") {
+      return "Please check the details and try again.";
+    }
+    if (error.status >= 500 || error.code === "server") {
+      return "We are experiencing server issues. Please try again later.";
+    }
+    return fallback;
+  }
+
+  return fallback;
+}
+
+function isBrowserOffline() {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
 }
 
 export function getToken() {
@@ -59,7 +107,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}) {
   if (options.auth !== false) {
     const token = getToken();
     if (!token) {
-      throw new ApiError("Please login again", 401);
+      throw new ApiError("Please sign in again to continue.", 401, undefined, "auth");
     }
     headers.set("Authorization", `Bearer ${token}`);
   }
@@ -113,10 +161,14 @@ async function performRequest<T>(
         error: serializeError(error),
       });
     }
+    const offline = isBrowserOffline();
     throw new ApiError(
-      "Unable to reach VibeTribe API. Check network, CORS, and backend deployment.",
+      offline
+        ? "You appear to be offline. Please reconnect and try again."
+        : "We are having trouble connecting right now. Please check your internet or try again later.",
       0,
       error,
+      offline ? "offline" : "network",
     );
   }
 
@@ -133,20 +185,32 @@ async function performRequest<T>(
   }
 
   if (!response.ok) {
-    const rawMessage =
-      (isRecord(data) ? data.error : undefined) ??
-      (isRecord(data) ? data.detail : undefined) ??
-      (isRecord(data) ? data.message : undefined) ??
-      (typeof data === "string" ? data : "Something went wrong");
-    const message = typeof rawMessage === "string" ? rawMessage : "Something went wrong";
-    throw new ApiError(message, response.status, data);
+    throw new ApiError(
+      getHttpErrorMessage(response.status, path),
+      response.status,
+      data,
+      getHttpErrorCode(response.status),
+    );
   }
 
   return data as T;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+function getHttpErrorMessage(status: number, path: string) {
+  if (status === 401 && path.includes("/auth/login")) return "Invalid email or password. Please try again.";
+  if (status === 401) return "Please sign in again to continue.";
+  if (status === 403) return "You do not have permission to do that.";
+  if (status === 409) return "That item already exists. Please try a different option.";
+  if (status === 422) return "Please check the details and try again.";
+  if (status >= 500) return "We are experiencing server issues. Please try again later.";
+  return "Something went wrong. Please try again.";
+}
+
+function getHttpErrorCode(status: number): ApiError["code"] {
+  if (status === 401) return "auth";
+  if (status === 422) return "validation";
+  if (status >= 500) return "server";
+  return "unknown";
 }
 
 function serializeError(error: unknown) {

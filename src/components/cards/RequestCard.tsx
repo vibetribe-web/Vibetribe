@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { respondToRequest } from "@/services/requestService";
 import { queryKeys } from "@/lib/queryKeys";
 import type { JoinRequest } from "@/types/request";
@@ -46,7 +47,7 @@ export function RequestCard({
       ]);
       onChanged?.();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not respond");
+      toast.error(getFriendlyErrorMessage(error, "Could not respond."));
     } finally {
       setBusy(false);
     }

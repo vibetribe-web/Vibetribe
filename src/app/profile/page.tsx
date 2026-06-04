@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { usernameLabel, userSafeContext } from "@/lib/userDisplay";
 import { updateCurrentUser, updateUsername } from "@/services/authService";
-import { getToken } from "@/services/api";
+import { getFriendlyErrorMessage, getToken } from "@/services/api";
 import type { User } from "@/types/user";
 
 export default function ProfilePage() {
@@ -115,7 +115,7 @@ function ProfileEditor({
       await refreshUser();
       toast.success("Profile updated");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update profile");
+      toast.error(getFriendlyErrorMessage(error, "Could not update profile."));
     }
   }
 
@@ -137,7 +137,7 @@ function ProfileEditor({
       setForm((current) => ({ ...current, username }));
       toast.success("Username updated successfully");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update username");
+      toast.error(getFriendlyErrorMessage(error, "Could not update username."));
     } finally {
       setSavingUsername(false);
     }

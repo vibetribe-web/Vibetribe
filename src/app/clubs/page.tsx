@@ -26,6 +26,7 @@ import { UserSelector } from "@/components/users/UserSelector";
 import { useAuth } from "@/hooks/useAuth";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
+import { getFriendlyErrorMessage } from "@/services/api";
 import {
   addClubMember,
   createClubEvent,
@@ -106,7 +107,7 @@ export default function ClubsPage() {
       setMemberUser(null);
       await refreshClubWorkspace();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update member");
+      toast.error(getFriendlyErrorMessage(error, "Could not update member."));
     }
   }
 
@@ -116,7 +117,7 @@ export default function ClubsPage() {
       toast.success("Event deleted");
       await refreshClubWorkspace();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete event");
+      toast.error(getFriendlyErrorMessage(error, "Could not delete event."));
     }
   }
 
@@ -362,7 +363,7 @@ function ClubEventForm({
       toast.success(event ? "Event updated" : "Event created");
       await onSaved();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save event");
+      toast.error(getFriendlyErrorMessage(error, "Could not save event."));
     } finally {
       setSaving(false);
     }

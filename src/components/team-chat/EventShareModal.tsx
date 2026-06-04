@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { listMyTeams, shareEventToTeam } from "@/services/teamService";
 import type { Event } from "@/types/event";
 import type { TeamWorkflow } from "@/types/team";
@@ -58,7 +59,7 @@ export function EventShareModal({
       setOpen(false);
       setNote("");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not share event");
+      toast.error(getFriendlyErrorMessage(error, "Could not share event."));
     } finally {
       setSharingTeamId(null);
     }

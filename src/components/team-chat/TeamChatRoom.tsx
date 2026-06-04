@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markTeamChatSeen } from "@/lib/teamChatNotifications";
 import { cn } from "@/lib/utils";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { getTeam, listTeamMessages, sendTeamMessage } from "@/services/teamService";
 import type { User } from "@/types/user";
 import type { TeamDetail, TeamMember, TeamMessage } from "@/types/team";
@@ -86,7 +87,7 @@ export function TeamChatRoom({ teamId, currentUser }: { teamId: number; currentU
         setForbidden(false);
       } catch (error) {
         if (isForbiddenError(error)) setForbidden(true);
-        if (mode !== "poll") toast.error(error instanceof Error ? error.message : "Could not load team chat");
+        if (mode !== "poll") toast.error(getFriendlyErrorMessage(error, "Could not load team chat."));
       } finally {
         setLoading(false);
         setLoadingOlder(false);
@@ -104,7 +105,7 @@ export function TeamChatRoom({ teamId, currentUser }: { teamId: number; currentU
         setMembers(teamData.members);
         await loadMessages("initial");
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not load team");
+        toast.error(getFriendlyErrorMessage(error, "Could not load team."));
         setLoading(false);
       }
     }
@@ -162,7 +163,7 @@ export function TeamChatRoom({ teamId, currentUser }: { teamId: number; currentU
       setMessages((current) =>
         current.map((message) => (message.id === optimisticId ? { ...message, failed: true, pending: false } : message)),
       );
-      toast.error(error instanceof Error ? error.message : "Could not send message");
+      toast.error(getFriendlyErrorMessage(error, "Could not send message."));
     } finally {
       setSending(false);
     }

@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AppWarmup } from "@/components/layout/AppWarmup";
 import { AppMotionShell } from "@/components/layout/AppMotionShell";
+import { ClientErrorBoundary } from "@/components/layout/ClientErrorBoundary";
+import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -35,8 +37,11 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen font-sans antialiased selection:bg-blue-200/70 selection:text-slate-950">
         <QueryProvider>
-          <AppWarmup />
-          <AppMotionShell>{children}</AppMotionShell>
+          <ClientErrorBoundary>
+            <OfflineBanner />
+            <AppWarmup />
+            <AppMotionShell>{children}</AppMotionShell>
+          </ClientErrorBoundary>
           <Toaster />
         </QueryProvider>
       </body>

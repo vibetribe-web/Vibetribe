@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthStore } from "@/store/authStore";
-import { setToken } from "@/services/api";
+import { getFriendlyErrorMessage, setToken } from "@/services/api";
 
 export function AuthForm() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export function AuthForm() {
       toast.success("Welcome back to VibeTribe");
       router.replace("/dashboard");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Login failed");
+      toast.error(getFriendlyErrorMessage(error, "Login failed. Please try again.", "login"));
     } finally {
       setLoading(null);
     }
@@ -77,7 +77,7 @@ export function AuthForm() {
       toast.success("Account created");
       router.replace("/dashboard");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Registration failed");
+      toast.error(getFriendlyErrorMessage(error, "Registration failed. Please try again.", "register"));
     } finally {
       setLoading(null);
     }

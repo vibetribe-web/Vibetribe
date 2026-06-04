@@ -25,6 +25,7 @@ import { UserSelector } from "@/components/users/UserSelector";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { userDisplayLabel, userSafeContext } from "@/lib/userDisplay";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { getAdminDashboard, listAdminRequests, listAdminUsers } from "@/services/adminService";
 import { assignLeader, createClub, deactivateClub, listAdminClubs, updateClub } from "@/services/clubService";
 import type { AdminDashboard } from "@/types/admin";
@@ -65,7 +66,7 @@ export default function AdminPage() {
       setUsers(userData);
       setRequests(requestData);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not load admin data");
+      toast.error(getFriendlyErrorMessage(error, "Could not load admin data."));
     } finally {
       setLoading(false);
     }
@@ -86,7 +87,7 @@ export default function AdminPage() {
       setClubForm({ name: "", description: "" });
       await load();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not create club");
+      toast.error(getFriendlyErrorMessage(error, "Could not create club."));
     } finally {
       setSavingClub(false);
     }
@@ -99,7 +100,7 @@ export default function AdminPage() {
       toast.success("Club updated");
       await load();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update club");
+      toast.error(getFriendlyErrorMessage(error, "Could not update club."));
     }
   }
 
@@ -109,7 +110,7 @@ export default function AdminPage() {
       toast.success("Leader assigned");
       await load();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not assign leader");
+      toast.error(getFriendlyErrorMessage(error, "Could not assign leader."));
     }
   }
 

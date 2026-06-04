@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { getEventStatus, getEventStatusBadgeClass, getEventStatusLabel, isFinishedEvent } from "@/lib/eventStatus";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { listEvents } from "@/services/eventService";
 import {
   getTeam,
@@ -81,7 +82,7 @@ export default function TeamWorkspacePage() {
         setMessages(messageData.items);
         setConversationError(null);
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Could not load conversation";
+        const message = getFriendlyErrorMessage(error, "Could not load conversation.");
         setConversationError(message);
         if (showErrors) toast.error(message);
       }
@@ -105,7 +106,7 @@ export default function TeamWorkspacePage() {
           await loadMessages(true);
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not load team workspace");
+        toast.error(getFriendlyErrorMessage(error, "Could not load team workspace."));
       } finally {
         setLoading(false);
       }
@@ -130,7 +131,7 @@ export default function TeamWorkspacePage() {
       setMessages((current) => [...current, message]);
       setMessageText("");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not send message");
+      toast.error(getFriendlyErrorMessage(error, "Could not send message."));
     } finally {
       setSending(false);
     }
@@ -146,7 +147,7 @@ export default function TeamWorkspacePage() {
       setShareContentByEvent((current) => ({ ...current, [eventId]: "" }));
       toast.success("Event shared");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not share event");
+      toast.error(getFriendlyErrorMessage(error, "Could not share event."));
     } finally {
       setSharingEventId(null);
     }
@@ -165,7 +166,7 @@ export default function TeamWorkspacePage() {
       syncTeam(updatedTeam);
       toast.success("Team updated");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update team");
+      toast.error(getFriendlyErrorMessage(error, "Could not update team."));
     } finally {
       setSavingTeam(false);
     }
@@ -178,7 +179,7 @@ export default function TeamWorkspacePage() {
       syncTeam(updatedTeam);
       toast.success(role === "leader" ? "Member promoted" : "Member demoted");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update member role");
+      toast.error(getFriendlyErrorMessage(error, "Could not update member role."));
     } finally {
       setBusyMemberId(null);
     }
@@ -191,7 +192,7 @@ export default function TeamWorkspacePage() {
       syncTeam(updatedTeam);
       toast.success("Member removed");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not remove member");
+      toast.error(getFriendlyErrorMessage(error, "Could not remove member."));
     } finally {
       setBusyMemberId(null);
     }

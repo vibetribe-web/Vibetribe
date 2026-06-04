@@ -44,6 +44,7 @@ import { getEventStatus, getEventStatusBadgeClass, getEventStatusLabel, isActive
 import { getSeenTeamMessageId } from "@/lib/teamChatNotifications";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
 import { formatDate } from "@/lib/utils";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { createJoinRequest } from "@/services/requestService";
 import { listRecommendedTeams } from "@/services/recommendationService";
 import { listInterestedEvents, markEventInterested, removeEventInterest } from "@/services/eventService";
@@ -167,7 +168,7 @@ export default function DashboardPage() {
       ]);
       toast.success("Join request sent");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not send request");
+      toast.error(getFriendlyErrorMessage(error, "Could not send request."));
     } finally {
       setRequestingTeamId(null);
     }
@@ -587,7 +588,7 @@ function DashboardEventCard({
     } catch (error) {
       setCurrentEvent(previous);
       onInterestChange?.(previous);
-      toast.error(error instanceof Error ? error.message : "Could not update interest");
+      toast.error(getFriendlyErrorMessage(error, "Could not update interest."));
     } finally {
       setUpdatingInterest(false);
     }

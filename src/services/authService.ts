@@ -3,8 +3,6 @@ import type { AuthToken, LoginPayload, RegisterPayload } from "@/types/auth";
 import type { User, UserUpdate } from "@/types/user";
 
 export async function login(payload: LoginPayload) {
-  const loginUrl = `${API_BASE_URL}/api/v1/auth/login/json`;
-  console.log("Login URL:", loginUrl);
   return apiFetch<AuthToken>("/api/v1/auth/login/json", {
     method: "POST",
     body: JSON.stringify({

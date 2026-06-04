@@ -24,6 +24,7 @@ import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { getEventStatus, getEventStatusBadgeClass, getEventStatusLabel, isFinishedEvent } from "@/lib/eventStatus";
 import { formatDate } from "@/lib/utils";
 import { queryKeys } from "@/lib/queryKeys";
+import { getFriendlyErrorMessage } from "@/services/api";
 import { markEventInterested, removeEventInterest, listEventTeammates } from "@/services/eventService";
 import { createTeam } from "@/services/teamService";
 import type { Event, EventTeammateRecommendation } from "@/types/event";
@@ -72,7 +73,7 @@ export function EventCard({
     } catch (error) {
       setCurrentEvent(previous);
       onInterestChange?.(previous);
-      toast.error(error instanceof Error ? error.message : "Could not update interest");
+      toast.error(getFriendlyErrorMessage(error, "Could not update interest."));
     } finally {
       setUpdatingInterest(false);
     }
@@ -227,7 +228,7 @@ function EventTeammatesDialog({ event }: { event: Event }) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.teams });
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Could not create event team");
+      toast.error(getFriendlyErrorMessage(error, "Could not create event team."));
     },
   });
 
