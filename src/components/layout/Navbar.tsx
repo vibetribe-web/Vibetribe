@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { LogOut, Menu, Sparkles, UserCircle } from "lucide-react";
+import { LogOut, Menu, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,13 +62,21 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/65 bg-white/88 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 text-sm font-bold tracking-tight text-slate-950">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-blue-600 to-violet-600 text-white shadow-sm shadow-blue-500/20">
-            <Sparkles className="h-4 w-4" />
+    <header className="sticky top-0 z-40 border-b border-slate-200/65 bg-white/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex h-14 shrink-0 items-center gap-3">
+          <Image
+            src="/vibetribe-app-mark.png"
+            alt=""
+            width={56}
+            height={48}
+            priority
+            aria-hidden="true"
+            className="block h-12 w-14 object-contain"
+          />
+          <span className="bg-gradient-to-r from-cyan-500 via-blue-600 to-fuchsia-600 bg-clip-text text-2xl font-black tracking-tight text-transparent">
+            VibeTribe
           </span>
-          VibeTribe
         </Link>
         <nav className="hidden items-center gap-0.5 md:flex">
           {links.map((link) => (

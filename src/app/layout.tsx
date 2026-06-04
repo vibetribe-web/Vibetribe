@@ -19,6 +19,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "VibeTribe",
   description: "Find your vibe. Build your tribe.",
+  icons: {
+    icon: "/vibetribe-app-mark.png",
+    shortcut: "/vibetribe-app-mark.png",
+    apple: "/vibetribe-app-logo.png",
+  },
 };
 
 export default function RootLayout({
