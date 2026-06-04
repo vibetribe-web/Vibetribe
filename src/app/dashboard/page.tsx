@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { getEventStatus, getEventStatusBadgeClass, getEventStatusLabel, isActiveEvent } from "@/lib/eventStatus";
 import { getSeenTeamMessageId } from "@/lib/teamChatNotifications";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
@@ -145,7 +146,10 @@ export default function DashboardPage() {
     staleTime: 45 * 1000,
   });
   const unreadCount = Object.values(conversationPreviews).reduce((sum, preview) => sum + preview.unread, 0);
-  const loading = teamsLoading || eventsLoading;
+  const showEventsSkeleton = useDelayedLoading(eventsLoading);
+  const showTeamsSkeleton = useDelayedLoading(teamsLoading);
+  const showConversationsSkeleton = useDelayedLoading(conversationsLoading);
+  const showRecommendationsSkeleton = useDelayedLoading(recommendedLoading);
 
   async function requestRecommendedTeam(team: RecommendedTeam) {
     setRequestingTeamId(team.team_id);
@@ -254,8 +258,8 @@ export default function DashboardPage() {
               subtitle="Saved hackathons and campus moments worth showing up for."
             >
               <div className="grid gap-5 lg:grid-cols-3">
-                {loading
-                  ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-96 rounded-3xl" />)
+                {showEventsSkeleton
+                  ? Array.from({ length: 3 }).map((_, index) => <DashboardEventSkeleton key={index} />)
                   : interestedEvents.map((event, index) => (
                       <DashboardEventCard
                         key={event.id}
@@ -268,7 +272,7 @@ export default function DashboardPage() {
                         }}
                       />
                     ))}
-                {!loading && !interestedEvents.length && (
+                {!eventsLoading && !interestedEvents.length && (
                   <EmptyPanel
                     actionHref="/events"
                     actionText="Find events"
@@ -289,10 +293,10 @@ export default function DashboardPage() {
                 subtitle="The people and projects you are building with."
               >
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
-                  {loading
-                    ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-56 rounded-3xl" />)
+                  {showTeamsSkeleton
+                    ? Array.from({ length: 3 }).map((_, index) => <DashboardTeamSkeleton key={index} />)
                     : myTeams.slice(0, 3).map((team) => <TeamCard compact key={team.id} team={team} viewerId={viewerId} />)}
-                  {!loading && !myTeams.length && (
+                  {!teamsLoading && !myTeams.length && (
                     <EmptyPanel
                       actionHref="/teams"
                       actionText="Create team"
@@ -310,8 +314,8 @@ export default function DashboardPage() {
                 subtitle="A quick path back into active team chats."
               >
                 <div className="space-y-4">
-                  {conversationsLoading
-                    ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-36 rounded-3xl" />)
+                  {showConversationsSkeleton
+                    ? Array.from({ length: 3 }).map((_, index) => <ConversationSkeleton key={index} />)
                     : myTeams.slice(0, 3).map((team) => (
                         <ConversationCard
                           key={team.id}
@@ -319,7 +323,7 @@ export default function DashboardPage() {
                           team={team}
                         />
                       ))}
-                  {!loading && !myTeams.length && (
+                  {!teamsLoading && !myTeams.length && (
                     <EmptyPanel
                       actionHref="/teams"
                       actionText="Browse teams"
@@ -340,10 +344,10 @@ export default function DashboardPage() {
               subtitle="Teams formed around specific events and hackathons."
             >
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {loading
-                  ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-56 rounded-3xl" />)
+                {showTeamsSkeleton
+                  ? Array.from({ length: 3 }).map((_, index) => <DashboardTeamSkeleton key={index} />)
                   : myEventTeams.slice(0, 3).map((team) => <TeamCard compact key={team.id} team={team} viewerId={viewerId} />)}
-                {!loading && !myEventTeams.length && (
+                {!teamsLoading && !myEventTeams.length && (
                   <EmptyPanel
                     actionHref="/events"
                     actionText="Browse events"
@@ -363,8 +367,8 @@ export default function DashboardPage() {
               subtitle="Skill, interest, and profile-based matches with room for you."
             >
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {recommendedLoading
-                    ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-72 rounded-3xl" />)
+                  {showRecommendationsSkeleton
+                    ? Array.from({ length: 3 }).map((_, index) => <RecommendedTeamSkeleton key={index} />)
                   : recommendedTeams.slice(0, 5).map((team) => (
                       <RecommendedTeamCard
                         key={team.team_id}
@@ -393,10 +397,10 @@ export default function DashboardPage() {
               subtitle="Public teams currently accepting requests."
             >
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {loading
-                  ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-56 rounded-3xl" />)
+                {showTeamsSkeleton
+                  ? Array.from({ length: 3 }).map((_, index) => <DashboardTeamSkeleton key={index} />)
                   : discoverTeams.slice(0, 3).map((team) => <TeamCard compact key={team.id} team={team} viewerId={viewerId} />)}
-                {!loading && !discoverTeams.length && (
+                {!teamsLoading && !discoverTeams.length && (
                   <EmptyPanel
                     actionHref="/discover"
                     actionText="Discover students"
@@ -448,6 +452,95 @@ function DashboardSection({
       </div>
       {children}
     </section>
+  );
+}
+
+function DashboardEventSkeleton() {
+  return (
+    <div className="h-96 overflow-hidden rounded-3xl border border-white/80 bg-white/86 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <Skeleton className="aspect-[16/9] rounded-none" />
+      <div className="p-5">
+        <div className="mb-4 flex gap-2">
+          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-6 w-24 rounded-full" />
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-4/5" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          <Skeleton className="h-10 rounded-xl" />
+          <Skeleton className="h-10 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardTeamSkeleton() {
+  return (
+    <div className="h-56 rounded-3xl border border-white/80 bg-white/84 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-1 gap-3">
+          <Skeleton className="h-12 w-12 shrink-0 rounded-2xl" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+        <Skeleton className="h-9 w-9 rounded-2xl" />
+      </div>
+      <div className="mt-5 space-y-3">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+      <div className="mt-5 flex gap-2">
+        <Skeleton className="h-7 w-20 rounded-full" />
+        <Skeleton className="h-7 w-16 rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+function ConversationSkeleton() {
+  return (
+    <div className="h-36 rounded-3xl border border-white/80 bg-white/84 p-5 shadow-sm backdrop-blur">
+      <div className="flex items-start gap-3">
+        <Skeleton className="h-11 w-11 shrink-0 rounded-2xl" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      </div>
+      <Skeleton className="mt-4 h-8 w-28 rounded-xl" />
+    </div>
+  );
+}
+
+function RecommendedTeamSkeleton() {
+  return (
+    <div className="h-72 rounded-3xl border border-white/80 bg-white/84 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-4 w-28" />
+        </div>
+        <Skeleton className="h-9 w-16 rounded-full" />
+      </div>
+      <div className="mt-5 space-y-3">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Skeleton className="h-7 w-20 rounded-full" />
+        <Skeleton className="h-7 w-24 rounded-full" />
+        <Skeleton className="h-7 w-16 rounded-full" />
+      </div>
+      <Skeleton className="mt-6 h-11 rounded-xl" />
+    </div>
   );
 }
 

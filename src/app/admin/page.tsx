@@ -19,9 +19,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { UserSelector } from "@/components/users/UserSelector";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { userDisplayLabel, userSafeContext } from "@/lib/userDisplay";
 import { getAdminDashboard, listAdminRequests, listAdminUsers } from "@/services/adminService";
 import { assignLeader, createClub, deactivateClub, listAdminClubs, updateClub } from "@/services/clubService";
@@ -42,6 +44,7 @@ export default function AdminPage() {
   const [leaderSelections, setLeaderSelections] = useState<Record<number, User | null>>({});
   const [userSearch, setUserSearch] = useState("");
   const [savingClub, setSavingClub] = useState(false);
+  const showAdminSkeleton = useDelayedLoading(loading);
 
   const load = useCallback(async () => {
     if (!auth.isAuthenticated) return;
@@ -50,17 +53,22 @@ export default function AdminPage() {
       return;
     }
     setLoading(true);
-    const [stats, clubData, userData, requestData] = await Promise.all([
-      getAdminDashboard(),
-      listAdminClubs(),
-      listAdminUsers(),
-      listAdminRequests(),
-    ]);
-    setDashboard(stats);
-    setClubs(clubData);
-    setUsers(userData);
-    setRequests(requestData);
-    setLoading(false);
+    try {
+      const [stats, clubData, userData, requestData] = await Promise.all([
+        getAdminDashboard(),
+        listAdminClubs(),
+        listAdminUsers(),
+        listAdminRequests(),
+      ]);
+      setDashboard(stats);
+      setClubs(clubData);
+      setUsers(userData);
+      setRequests(requestData);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load admin data");
+    } finally {
+      setLoading(false);
+    }
   }, [auth.isAuthenticated, auth.user, router]);
 
   useEffect(() => {
@@ -153,10 +161,16 @@ export default function AdminPage() {
           </div>
 
           <div className="mb-8 grid gap-5 md:grid-cols-4">
-            <Stat label="Users" value={dashboard?.users_count ?? 0} />
-            <Stat label="Teams" value={dashboard?.teams_count ?? 0} />
-            <Stat label="Requests" value={dashboard?.requests_count ?? 0} />
-            <Stat label="Pending" value={dashboard?.pending_requests_count ?? 0} />
+            {showAdminSkeleton ? (
+              Array.from({ length: 4 }).map((_, index) => <StatSkeleton key={index} />)
+            ) : (
+              <>
+                <Stat label="Users" value={dashboard?.users_count ?? 0} />
+                <Stat label="Teams" value={dashboard?.teams_count ?? 0} />
+                <Stat label="Requests" value={dashboard?.requests_count ?? 0} />
+                <Stat label="Pending" value={dashboard?.pending_requests_count ?? 0} />
+              </>
+            )}
           </div>
 
           <Tabs defaultValue="clubs">
@@ -167,7 +181,9 @@ export default function AdminPage() {
             </TabsList>
             <TabsContent value="clubs">
               <div className="grid gap-5">
-                {clubs.map((club) => (
+                {showAdminSkeleton
+                  ? Array.from({ length: 3 }).map((_, index) => <AdminClubSkeleton key={index} />)
+                  : clubs.map((club) => (
                   <Card key={club.id}>
                     <CardHeader>
                       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
@@ -231,7 +247,9 @@ export default function AdminPage() {
                 />
               </div>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {visibleUsers.map((user) => (
+                {showAdminSkeleton
+                  ? Array.from({ length: 6 }).map((_, index) => <UserRowSkeleton key={index} />)
+                  : visibleUsers.map((user) => (
                   <Card key={user.id}>
                     <CardContent className="p-5">
                       <div className="flex items-center justify-between gap-3">
@@ -250,7 +268,9 @@ export default function AdminPage() {
             </TabsContent>
             <TabsContent value="events">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {requests.map((request) => (
+                {showAdminSkeleton
+                  ? Array.from({ length: 6 }).map((_, index) => <UserRowSkeleton key={index} />)
+                  : requests.map((request) => (
                   <Card key={request.id}>
                     <CardContent className="p-5">
                       <p className="font-semibold">{request.team?.name || "Selected team"}</p>
@@ -276,6 +296,62 @@ function Stat({ label, value }: { label: string; value: number }) {
       <CardContent className="p-5">
         <p className="text-sm text-slate-500">{label}</p>
         <p className="mt-2 text-3xl font-bold">{value}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StatSkeleton() {
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="mt-3 h-9 w-16" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function AdminClubSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-full max-w-xl" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-7 w-16 rounded-full" />
+            <Skeleton className="h-9 w-28 rounded-xl" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-7 w-24 rounded-full" />
+          <Skeleton className="h-7 w-20 rounded-full" />
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Skeleton className="h-10 flex-1 rounded-xl" />
+          <Skeleton className="h-10 w-36 rounded-xl" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function UserRowSkeleton() {
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+          <Skeleton className="h-7 w-16 rounded-full" />
+        </div>
       </CardContent>
     </Card>
   );

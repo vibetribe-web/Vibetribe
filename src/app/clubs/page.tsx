@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { UserSelector } from "@/components/users/UserSelector";
 import { useAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
 import {
   addClubMember,
@@ -56,6 +57,7 @@ export default function ClubsPage() {
     enabled: auth.isAuthenticated,
     staleTime: staleTimes.clubs,
   });
+  const showClubsSkeleton = useDelayedLoading(loading);
 
   const selectedClub = clubs.find((club) => club.id === selectedClubId) ?? null;
   const { data: events = [], isLoading: eventsLoading } = useQuery({
@@ -64,6 +66,7 @@ export default function ClubsPage() {
     enabled: Boolean(selectedClubId),
     staleTime: staleTimes.events,
   });
+  const showClubEventsSkeleton = useDelayedLoading(eventsLoading);
   const { data: members = [], isSuccess: canAccessMembers } = useQuery({
     queryKey: selectedClubId ? queryKeys.clubMembers(selectedClubId) : ["clubs", "members", "none"],
     queryFn: () => listClubMembers(selectedClubId as number),
@@ -129,8 +132,8 @@ export default function ClubsPage() {
         </div>
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(20rem,0.82fr)_minmax(0,1.18fr)]">
           <div className="grid content-start gap-5 sm:grid-cols-2 lg:grid-cols-1">
-            {loading
-              ? Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-44 rounded-2xl" />)
+            {showClubsSkeleton
+              ? Array.from({ length: 4 }).map((_, index) => <ClubCardSkeleton key={index} />)
               : clubs.map((club) => (
                   <ClubCard
                     key={club.id}
@@ -258,8 +261,8 @@ export default function ClubsPage() {
                     <Badge variant="secondary">{events.length} event{events.length === 1 ? "" : "s"}</Badge>
                   </div>
                   <div className="grid gap-5 md:grid-cols-2">
-                    {eventsLoading
-                      ? Array.from({ length: 2 }).map((_, index) => <Skeleton key={index} className="h-96 rounded-2xl" />)
+                    {showClubEventsSkeleton
+                      ? Array.from({ length: 2 }).map((_, index) => <ClubEventSkeleton key={index} />)
                       : events.map((event) => (
                           <div
                             key={event.id}
@@ -443,6 +446,42 @@ function EmptyClubSelection() {
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
         Choose a club from the list to view its details, activities, and upcoming events.
       </p>
+    </div>
+  );
+}
+
+function ClubCardSkeleton() {
+  return (
+    <div className="min-h-44 rounded-2xl border border-white/80 bg-white/82 p-6 shadow-sm backdrop-blur">
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-11 w-11 rounded-xl" />
+        <Skeleton className="h-7 w-16 rounded-full" />
+      </div>
+      <div className="mt-6 space-y-3">
+        <Skeleton className="h-6 w-2/3" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+    </div>
+  );
+}
+
+function ClubEventSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_14px_42px_rgba(15,23,42,0.07)]">
+      <div className="p-4">
+        <Skeleton className="aspect-[16/9] rounded-xl" />
+        <div className="mt-5 space-y-3">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-7 w-4/5" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <div className="grid gap-2 pt-2 sm:grid-cols-2">
+            <Skeleton className="h-10 rounded-2xl" />
+            <Skeleton className="h-10 rounded-2xl" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

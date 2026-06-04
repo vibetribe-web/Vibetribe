@@ -10,6 +10,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
 import { listMyRequests, listTeamRequests } from "@/services/requestService";
 import { listTeams } from "@/services/teamService";
@@ -49,7 +50,9 @@ export default function RequestsPage() {
     () => incomingQueries.flatMap((query) => query.data ?? []),
     [incomingQueries],
   );
-  const loading = sentLoading || teamsLoading || incomingQueries.some((query) => query.isLoading);
+  const incomingLoading = teamsLoading || incomingQueries.some((query) => query.isLoading);
+  const showIncomingSkeleton = useDelayedLoading(incomingLoading);
+  const showSentSkeleton = useDelayedLoading(sentLoading);
 
   return (
     <main>
@@ -87,21 +90,21 @@ export default function RequestsPage() {
             </TabsList>
             <TabsContent value="incoming">
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {loading
-                  ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-64 rounded-2xl" />)
+                {showIncomingSkeleton
+                  ? Array.from({ length: 3 }).map((_, index) => <RequestCardSkeleton key={index} />)
                   : incoming.map((request) => <RequestCard key={request.id} request={request} mode="incoming" />)}
               </div>
-              {!loading && leaderTeams.length === 0 && (
+              {!incomingLoading && leaderTeams.length === 0 && (
                 <EmptyRequests text="Create a team to receive incoming join requests." />
               )}
             </TabsContent>
             <TabsContent value="sent">
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {loading
-                  ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-64 rounded-2xl" />)
+                {showSentSkeleton
+                  ? Array.from({ length: 3 }).map((_, index) => <RequestCardSkeleton key={index} />)
                   : sent.map((request) => <RequestCard key={request.id} request={request} mode="sent" />)}
               </div>
-              {!loading && sent.length === 0 && (
+              {!sentLoading && sent.length === 0 && (
                 <EmptyRequests text="Sent requests will appear here when you reach out to teams." />
               )}
             </TabsContent>
@@ -137,6 +140,34 @@ function EmptyRequests({ text }: { text: string }) {
   return (
     <div className="mt-6 rounded-2xl border border-dashed border-slate-300/80 bg-white/70 p-8 text-center shadow-sm backdrop-blur">
       <p className="text-sm leading-6 text-slate-500">{text}</p>
+    </div>
+  );
+}
+
+function RequestCardSkeleton() {
+  return (
+    <div className="h-64 rounded-2xl border border-white/80 bg-white/90 p-5 shadow-sm backdrop-blur">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <Skeleton className="h-10 w-10 shrink-0 rounded-2xl" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+        <Skeleton className="h-7 w-20 rounded-full" />
+      </div>
+      <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/85 p-4">
+        <Skeleton className="h-3 w-24" />
+        <div className="mt-3 space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Skeleton className="h-10 rounded-xl" />
+        <Skeleton className="h-10 rounded-xl" />
+      </div>
     </div>
   );
 }

@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
 import { usernameLabel } from "@/lib/userDisplay";
 import { createJoinRequest } from "@/services/requestService";
@@ -57,6 +58,7 @@ export default function DiscoverPage() {
     [allUsers, auth.user?.id],
   );
   const loading = usersLoading || teamsLoading;
+  const showDiscoverSkeleton = useDelayedLoading(loading);
 
   const filtered = useMemo(
     () =>
@@ -140,8 +142,8 @@ export default function DiscoverPage() {
             initial="hidden"
             transition={{ staggerChildren: 0.06 }}
           >
-            {loading
-              ? Array.from({ length: 6 }).map((_, index) => <Skeleton key={index} className="h-80 rounded-2xl" />)
+            {showDiscoverSkeleton
+              ? Array.from({ length: 6 }).map((_, index) => <UserCardSkeleton key={index} />)
               : filtered.map((user) => (
                 <motion.div
                   key={user.id}
@@ -246,6 +248,34 @@ function Info({ label, value }: { label: string; value?: string | null }) {
     <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
       <p className="mt-1 font-medium text-slate-700">{value || "Not added"}</p>
+    </div>
+  );
+}
+
+function UserCardSkeleton() {
+  return (
+    <div className="h-80 rounded-2xl border border-white/80 bg-white/82 p-5 shadow-sm backdrop-blur">
+      <div className="flex items-start gap-4">
+        <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      </div>
+      <div className="mt-6 space-y-3">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Skeleton className="h-7 w-20 rounded-full" />
+        <Skeleton className="h-7 w-16 rounded-full" />
+        <Skeleton className="h-7 w-24 rounded-full" />
+      </div>
+      <div className="mt-7 grid grid-cols-2 gap-2">
+        <Skeleton className="h-11 rounded-xl" />
+        <Skeleton className="h-11 rounded-xl" />
+      </div>
     </div>
   );
 }

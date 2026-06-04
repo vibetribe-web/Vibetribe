@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { EVENT_STATUS_OPTIONS, type EventStatusFilter, getEventStatus } from "@/lib/eventStatus";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
 import { listEvents } from "@/services/eventService";
@@ -31,6 +32,7 @@ export default function EventsPage() {
     enabled: auth.isAuthenticated,
     staleTime: staleTimes.events,
   });
+  const showEventsSkeleton = useDelayedLoading(loading);
 
   const filtered = useMemo(
     () =>
@@ -123,7 +125,7 @@ export default function EventsPage() {
               initial="hidden"
               transition={{ staggerChildren: 0.06 }}
             >
-              {loading
+              {showEventsSkeleton
                 ? Array.from({ length: 6 }).map((_, index) => <EventSkeleton key={index} />)
                 : filtered.map((event) => (
                     <motion.div

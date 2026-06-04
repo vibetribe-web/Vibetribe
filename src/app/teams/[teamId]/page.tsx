@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { getEventStatus, getEventStatusBadgeClass, getEventStatusLabel, isFinishedEvent } from "@/lib/eventStatus";
 import { listEvents } from "@/services/eventService";
 import {
@@ -40,6 +41,7 @@ export default function TeamWorkspacePage() {
   const [messages, setMessages] = useState<TeamMessage[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const showWorkspaceSkeleton = useDelayedLoading(loading);
   const [conversationError, setConversationError] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
@@ -201,7 +203,7 @@ export default function TeamWorkspacePage() {
       <div className="flex min-h-[calc(100vh-4rem)]">
         <Sidebar />
         <section className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          {loading ? (
+          {showWorkspaceSkeleton ? (
             <TeamWorkspaceSkeleton />
           ) : team ? (
             <div className="mx-auto max-w-6xl space-y-6">

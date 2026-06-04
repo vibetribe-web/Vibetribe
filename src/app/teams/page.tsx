@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { queryKeys, staleTimes } from "@/lib/queryKeys";
 import { createJoinRequest } from "@/services/requestService";
 import { createTeam, listTeams } from "@/services/teamService";
@@ -54,6 +55,7 @@ export default function TeamsPage() {
     enabled: auth.isAuthenticated && Boolean(viewerId),
     staleTime: staleTimes.teams,
   });
+  const showTeamsSkeleton = useDelayedLoading(loading);
 
   const myTeams = useMemo(
     () => teams.filter((team) => isVisibleMemberTeam(team, viewerId)),
@@ -245,9 +247,9 @@ export default function TeamsPage() {
             </div>
           </motion.div>
 
-          {loading ? (
+          {showTeamsSkeleton ? (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, index) => <Skeleton key={index} className="h-72 rounded-3xl" />)}
+              {Array.from({ length: 6 }).map((_, index) => <TeamCardSkeleton key={index} />)}
             </div>
           ) : (
             <div className="space-y-10">
@@ -415,6 +417,37 @@ function TeamSection({
         </div>
       )}
     </section>
+  );
+}
+
+function TeamCardSkeleton() {
+  return (
+    <div className="h-72 rounded-3xl border border-white/80 bg-white/84 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 gap-3">
+          <Skeleton className="h-12 w-12 shrink-0 rounded-2xl" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+        <Skeleton className="h-9 w-16 rounded-full" />
+      </div>
+      <div className="mt-6 space-y-3">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Skeleton className="h-7 w-20 rounded-full" />
+        <Skeleton className="h-7 w-24 rounded-full" />
+        <Skeleton className="h-7 w-16 rounded-full" />
+      </div>
+      <div className="mt-6 grid grid-cols-2 gap-2">
+        <Skeleton className="h-11 rounded-xl" />
+        <Skeleton className="h-11 rounded-xl" />
+      </div>
+    </div>
   );
 }
 

@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 import { getEventStatus, getEventStatusBadgeClass, getEventStatusLabel, isFinishedEvent } from "@/lib/eventStatus";
 import { formatDate } from "@/lib/utils";
 import { queryKeys } from "@/lib/queryKeys";
@@ -217,6 +219,7 @@ function EventTeammatesDialog({ event }: { event: Event }) {
     enabled: open,
     staleTime: 60 * 1000,
   });
+  const showTeammatesSkeleton = useDelayedLoading(isLoading);
   const createEventTeam = useMutation({
     mutationFn: (payload: TeamPayload) => createTeam(payload),
     onSuccess: async () => {
@@ -301,8 +304,8 @@ function EventTeammatesDialog({ event }: { event: Event }) {
           </form>
           <div className="space-y-3">
             <p className="font-bold text-slate-950">Interested students</p>
-            {isLoading ? (
-              <div className="rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">Loading event matches...</div>
+            {showTeammatesSkeleton ? (
+              Array.from({ length: 3 }).map((_, index) => <EventTeammateSkeleton key={index} />)
             ) : teammates.length ? (
               teammates.map((teammate) => <EventTeammateRow key={teammate.id} teammate={teammate} />)
             ) : (
@@ -352,6 +355,32 @@ function EventTeammateRow({ teammate }: { teammate: EventTeammateRecommendation 
             <UserPlus className="h-4 w-4" />
             Invite to event team
           </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventTeammateSkeleton() {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+            <Skeleton className="h-7 w-14 rounded-full" />
+          </div>
+          <Skeleton className="mt-3 h-4 w-3/4" />
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Skeleton className="h-7 w-20 rounded-full" />
+            <Skeleton className="h-7 w-16 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </div>
+          <Skeleton className="mt-3 h-10 rounded-xl" />
         </div>
       </div>
     </div>
