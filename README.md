@@ -8,6 +8,12 @@ Create or update `.env.local`:
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001
 ```
 
+For the deployed Vercel frontend, set `NEXT_PUBLIC_API_BASE_URL` to the deployed Render backend origin, for example:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://your-render-service.onrender.com
+```
+
 Event poster uploads are signed by the backend. Configure Supabase Storage in the backend `.env`; the frontend only needs the API base URL.
 
 First, run the development server:

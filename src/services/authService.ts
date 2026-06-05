@@ -40,5 +40,10 @@ export async function updateUsername(username: string) {
 }
 
 export function redirectToGoogleLogin() {
+  if (!API_BASE_URL) {
+    return false;
+  }
+
   window.location.href = `${API_BASE_URL}/api/v1/auth/google/login`;
+  return true;
 }
