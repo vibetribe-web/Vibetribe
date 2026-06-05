@@ -14,6 +14,12 @@ For the deployed Vercel frontend, set `NEXT_PUBLIC_API_BASE_URL` to the deployed
 NEXT_PUBLIC_API_BASE_URL=https://your-render-service.onrender.com
 ```
 
+For the current VibeTribe Render backend:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://vibetribe-t07f.onrender.com
+```
+
 Event poster uploads are signed by the backend. Configure Supabase Storage in the backend `.env`; the frontend only needs the API base URL.
 
 First, run the development server:
