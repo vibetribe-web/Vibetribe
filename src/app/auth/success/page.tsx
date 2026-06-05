@@ -20,6 +20,7 @@ function AuthSuccess() {
   const router = useRouter();
   const params = useSearchParams();
   const getCurrentUser = useAuthStore((state) => state.getCurrentUser);
+  const oauthError = params.get("oauth_error");
 
   useEffect(() => {
     const token = params.get("access_token") ?? params.get("token");
@@ -37,6 +38,14 @@ function AuthSuccess() {
           <>
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
             <h1 className="mt-4 text-2xl font-bold">Signing you in</h1>
+          </>
+        ) : oauthError ? (
+          <>
+            <h1 className="text-2xl font-bold">Google sign-in expired</h1>
+            <p className="mt-3 text-slate-600">Return to auth and start Google sign-in again.</p>
+            <Button asChild className="mt-6" variant="gradient">
+              <Link href="/auth">Go to auth</Link>
+            </Button>
           </>
         ) : (
           <>
